@@ -47,7 +47,9 @@ def upload():
 @app.route('/uploads/<filename>')
 def get_image(filename):
     """Return a specific image from the uploads folder."""
-    return send_from_directory(os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER']), filename)
+    folder_path = os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER']) #debug
+    print("Serving from:", folder_path)#debug
+    return send_from_directory(folder_path, filename)
 
 #New files route
 @app.route('/files')
@@ -55,6 +57,7 @@ def get_image(filename):
 def files():
     """Display uploaded images in an HTML list."""
     images = get_uploaded_images()  #get list of uploaded image filenames
+    print("Images found:", images) #debug
     return render_template('files.html', images=images)
 
 
@@ -94,6 +97,14 @@ def login():
 def load_user(id):
     return db.session.execute(db.select(UserProfile).filter_by(id=id)).scalar()
 
+#new logout route
+@app.route('/logout')
+@login_required
+def logout():
+    """Log out the user and redirect to home."""
+    logout_user()  #log out user
+    flash("You have been logged out successfully.", "info")  #flash message
+    return redirect(url_for('home'))  #redirect to home page
 
 #helper function to iterate over upload folder content
 def get_uploaded_images():
