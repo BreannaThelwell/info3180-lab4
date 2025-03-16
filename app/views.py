@@ -1,6 +1,6 @@
 import os
 from app import app, db, login_manager
-from flask import render_template, request, redirect, url_for, flash, session, abort
+from flask import render_template, request, redirect, url_for, flash, session, abort, send_from_directory #added required import
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.utils import secure_filename
 from app.models import UserProfile
@@ -43,6 +43,20 @@ def upload():
 
     return render_template('upload.html', form=form) #render upload template
 
+#New upload route and view function
+@app.route('/uploads/<filename>')
+def get_image(filename):
+    """Return a specific image from the uploads folder."""
+    return send_from_directory(os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER']), filename)
+
+#New files route
+@app.route('/files')
+@login_required #accessed by logged-in users
+def files():
+    """Display uploaded images in an HTML list."""
+    images = get_uploaded_images()  #get list of uploaded image filenames
+    return render_template('files.html', images=images)
+
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -80,6 +94,21 @@ def login():
 def load_user(id):
     return db.session.execute(db.select(UserProfile).filter_by(id=id)).scalar()
 
+
+#helper function to iterate over upload folder content
+def get_uploaded_images():
+    """Iterate over the uploads folder and return a list of filenames."""
+    upload_folder = os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER'])  #defines upload directory
+    image_files = [] #list for image filenames
+
+    
+    #checks if directory exists
+    if os.path.exists(upload_folder):
+        for file in os.listdir(upload_folder):
+            if file.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):  #filters image files
+                image_files.append(file)
+
+    return image_files  #return list of uploaded images
 ###
 # The functions below should be applicable to all Flask apps.
 ###

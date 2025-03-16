@@ -12,5 +12,5 @@ class LoginForm(FlaskForm):
 class UploadForm(FlaskForm):
     file = FileField('Image File', validators=[
         FileRequired(),
-        FileAllowed(['jpg', 'png'], 'Only JPG and PNG images are allowed!')
+        FileAllowed(['jpg', 'png','.jpeg', '.gif'], 'Only images are allowed!')
     ])
